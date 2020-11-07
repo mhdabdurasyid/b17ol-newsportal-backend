@@ -19,17 +19,25 @@ module.exports = {
     } else {
       const { email, password, name } = value
 
-      const salt = bcrypt.genSaltSync(10)
-      const hashedPassword = bcrypt.hashSync(password, salt)
+      const isEmailAvailable = await Users.findAll({
+        where: { email: email }
+      })
 
-      const data = {
-        email,
-        password: hashedPassword,
-        name
+      if (isEmailAvailable.length) {
+        return responseStandard(res, 'Email already registered!', {}, 403, false)
+      } else {
+        const salt = bcrypt.genSaltSync(10)
+        const hashedPassword = bcrypt.hashSync(password, salt)
+
+        const data = {
+          email,
+          password: hashedPassword,
+          name
+        }
+
+        const result = await Users.create(data)
+        return responseStandard(res, 'Create user successfully', { result: result })
       }
-
-      const result = await Users.create(data)
-      return responseStandard(res, 'Create user successfully', { result: result })
     }
   }
 }
