@@ -1,6 +1,7 @@
 const responseStandard = require('../helpers/responses')
 const qs = require('querystring')
 const { Op } = require('sequelize')
+const Joi = require('joi')
 
 const { APP_PORT, BASE_URL } = process.env
 
@@ -20,13 +21,33 @@ module.exports = {
     if (!limit) {
       limit = 10
     } else {
-      limit = parseInt(limit)
+      const schema = Joi.object({
+        limit: Joi.number().integer().min(1)
+      })
+
+      const { error, value } = schema.validate({ limit: limit })
+
+      if (error) {
+        return responseStandard(res, error.message, {}, 400, false)
+      }
+
+      limit = value.limit
     }
 
     if (!page) {
       page = 1
     } else {
-      page = parseInt(page)
+      const schema = Joi.object({
+        page: Joi.number().integer().min(1)
+      })
+
+      const { error, value } = schema.validate({ page: page })
+
+      if (error) {
+        return responseStandard(res, error.message, {}, 400, false)
+      }
+
+      page = value.page
     }
 
     if (!search) {
