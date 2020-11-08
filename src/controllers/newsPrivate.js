@@ -99,7 +99,10 @@ module.exports = {
       attributes: ['id', 'title', 'content', 'createdAt', 'updatedAt'],
       where: {
         author: id
-      }
+      },
+      order: [
+        ['createdAt', 'DESC']
+      ]
     })
 
     if (getNews.length) {
