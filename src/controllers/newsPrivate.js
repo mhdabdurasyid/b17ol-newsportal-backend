@@ -61,5 +61,22 @@ module.exports = {
         return responseStandard(res, 'Edit news failed!', {}, 400, false)
       }
     }
+  },
+  deleteNews: async (req, res) => {
+    const { id } = req.user
+    const { newsId } = req.params
+
+    const isDeleted = await news.destroy({
+      where: {
+        id: newsId,
+        author: id
+      }
+    })
+
+    if (isDeleted === 1) {
+      return responseStandard(res, 'Delete news successfully!', {})
+    } else {
+      return responseStandard(res, 'Delete news failed!', {}, 400, false)
+    }
   }
 }
