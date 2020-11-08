@@ -29,6 +29,10 @@ module.exports = {
       page = parseInt(page)
     }
 
+    if (!search) {
+      search = ''
+    }
+
     const pageInfo = {
       count: 0,
       pages: 0,
