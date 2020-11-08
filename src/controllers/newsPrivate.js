@@ -2,6 +2,13 @@ const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
 
 const { news } = require('../models')
+const { Users } = require('../models')
+
+Users.hasMany(news)
+news.belongsTo(Users, {
+  foreignKey: 'author',
+  as: 'Author'
+})
 
 module.exports = {
   postNews: async (req, res) => {
@@ -77,6 +84,28 @@ module.exports = {
       return responseStandard(res, 'Delete news successfully!', {})
     } else {
       return responseStandard(res, 'Delete news failed!', {}, 400, false)
+    }
+  },
+  getNewsByUser: async (req, res) => {
+    const { id } = req.user
+
+    const getNews = await news.findAll({
+      include: {
+        model: Users,
+        as: 'Author',
+        attributes: ['id', 'name', 'photo'],
+        required: true
+      },
+      attributes: ['id', 'title', 'content', 'createdAt', 'updatedAt'],
+      where: {
+        author: id
+      }
+    })
+
+    if (getNews.length) {
+      return responseStandard(res, 'List of news!', { result: getNews })
+    } else {
+      return responseStandard(res, 'There is no news!', {}, 404, false)
     }
   }
 }
