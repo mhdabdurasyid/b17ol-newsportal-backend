@@ -10,8 +10,7 @@ const { Users } = require('../models')
 
 Users.hasMany(news)
 news.belongsTo(Users, {
-  foreignKey: 'author',
-  as: 'Author'
+  foreignKey: 'author'
 })
 
 module.exports = {
@@ -118,7 +117,6 @@ module.exports = {
     const getNews = await news.findAll({
       include: {
         model: Users,
-        as: 'Author',
         attributes: ['id', 'name', 'photo'],
         required: true
       },
