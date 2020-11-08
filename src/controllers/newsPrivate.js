@@ -1,6 +1,7 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
 const qs = require('querystring')
+const { Op } = require('sequelize')
 
 const { APP_PORT, BASE_URL } = process.env
 
@@ -91,7 +92,7 @@ module.exports = {
   },
   getNewsByUser: async (req, res) => {
     const { id } = req.user
-    let { page, limit } = req.query
+    let { page, limit, search } = req.query
 
     if (!limit) {
       limit = 10
@@ -123,7 +124,19 @@ module.exports = {
       },
       attributes: ['id', 'title', 'content', 'createdAt', 'updatedAt'],
       where: {
-        author: id
+        author: id,
+        [Op.or]: [
+          {
+            title: {
+              [Op.substring]: search
+            }
+          },
+          {
+            content: {
+              [Op.substring]: search
+            }
+          }
+        ]
       },
       order: [
         ['createdAt', 'DESC']
@@ -135,7 +148,19 @@ module.exports = {
     if (getNews.length) {
       const count = await news.count({
         where: {
-          author: id
+          author: id,
+          [Op.or]: [
+            {
+              title: {
+                [Op.substring]: search
+              }
+            },
+            {
+              content: {
+                [Op.substring]: search
+              }
+            }
+          ]
         }
       })
 
