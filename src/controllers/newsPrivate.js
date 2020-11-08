@@ -144,7 +144,7 @@ module.exports = {
         attributes: ['id', 'name', 'photo'],
         required: true
       },
-      attributes: ['id', 'title', 'content', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'title', 'content', 'image', 'createdAt', 'updatedAt'],
       where: {
         author: id,
         [Op.or]: [
