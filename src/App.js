@@ -6,6 +6,7 @@ const cors = require('cors')
 // import public route
 const usersRoute = require('../src/routes/users')
 const authRoute = require('../src/routes/auth')
+const newsRoute = require('../src/routes/news')
 
 // import private route
 const usersPrivateRoute = require('../src/routes/usersPrivate')
@@ -27,6 +28,7 @@ app.use('/uploads', express.static('assets/uploads'))
 // define public route
 app.use('/users', usersRoute)
 app.use('/auth', authRoute)
+app.use('/news', newsRoute)
 
 // define private route
 app.use('/private/users', authMidlleware, usersPrivateRoute)
