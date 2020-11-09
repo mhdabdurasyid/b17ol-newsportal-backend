@@ -9,11 +9,6 @@ const { APP_PORT, BASE_URL } = process.env
 const { news } = require('../models')
 const { Users } = require('../models')
 
-Users.hasMany(news)
-news.belongsTo(Users, {
-  foreignKey: 'author'
-})
-
 module.exports = {
   postNews: async (req, res) => {
     const { id } = req.user
@@ -166,6 +161,7 @@ module.exports = {
     const getNews = await news.findAll({
       include: {
         model: Users,
+        as: 'Author',
         attributes: ['id', 'name', 'photo'],
         required: true
       },

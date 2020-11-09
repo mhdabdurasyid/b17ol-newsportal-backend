@@ -8,12 +8,6 @@ const { APP_PORT, BASE_URL } = process.env
 const { news } = require('../models')
 const { Users } = require('../models')
 
-Users.hasMany(news)
-news.belongsTo(Users, {
-  foreignKey: 'author',
-  as: 'Author'
-})
-
 module.exports = {
   getAllNews: async (req, res) => {
     let { page, limit, search } = req.query
