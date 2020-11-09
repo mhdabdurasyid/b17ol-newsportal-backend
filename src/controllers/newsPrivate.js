@@ -1,4 +1,5 @@
 const responseStandard = require('../helpers/responses')
+const upload = require('../helpers/upload')
 const Joi = require('joi')
 const qs = require('querystring')
 const { Op } = require('sequelize')
@@ -42,35 +43,47 @@ module.exports = {
   editNews: async (req, res) => {
     const { id } = req.user
     const { newsId } = req.params
+    const uploadImage = upload.single('image')
 
     const schema = Joi.object({
-      title: Joi.string().max(255).required(),
-      content: Joi.string().required()
+      title: Joi.string().max(255),
+      content: Joi.string()
     })
 
-    const { error, value } = schema.validate(req.body)
-
-    if (error) {
-      return responseStandard(res, error.message, {}, 400, false)
-    } else {
-      const { title, content } = value
-
-      const isEdited = await news.update({
-        title,
-        content
-      }, {
-        where: {
-          id: newsId,
-          author: id
-        }
-      })
-
-      if (isEdited[0] === 1) {
-        return responseStandard(res, 'Edit news successfully!', {})
+    uploadImage(req, res, async (err) => {
+      if (err) {
+        return responseStandard(res, err.message, {}, 400, false)
       } else {
-        return responseStandard(res, 'Edit news failed!', {}, 400, false)
+        const image = req.file
+        const { error, value } = schema.validate(req.body)
+        const { title, content } = value
+
+        if (title || content || image) {
+          if (error) {
+            return responseStandard(res, error.message, {}, 400, false)
+          } else {
+            const isEdited = await news.update({
+              title,
+              content,
+              image: image && `/uploads/${image.filename}`
+            }, {
+              where: {
+                id: newsId,
+                author: id
+              }
+            })
+
+            if (isEdited[0] === 1) {
+              return responseStandard(res, 'Edit news successfully!', {})
+            } else {
+              return responseStandard(res, 'Edit news failed!', {}, 400, false)
+            }
+          }
+        } else {
+          return responseStandard(res, 'Require one of the input form!', {}, 400, false)
+        }
       }
-    }
+    })
   },
   deleteNews: async (req, res) => {
     const { id } = req.user
