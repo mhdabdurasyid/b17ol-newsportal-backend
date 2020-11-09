@@ -17,28 +17,40 @@ news.belongsTo(Users, {
 module.exports = {
   postNews: async (req, res) => {
     const { id } = req.user
+    const uploadImage = upload.single('image')
 
     const schema = Joi.object({
       title: Joi.string().max(255).required(),
       content: Joi.string().required()
     })
 
-    const { error, value } = schema.validate(req.body)
+    uploadImage(req, res, async (err) => {
+      if (err) {
+        return responseStandard(res, err.message, {}, 400, false)
+      } else {
+        const image = req.file
+        const { error, value } = schema.validate(req.body)
+        const { title, content } = value
 
-    if (error) {
-      return responseStandard(res, error.message, {}, 400, false)
-    } else {
-      const { title, content } = value
+        if (image) {
+          if (error) {
+            return responseStandard(res, error.message, {}, 400, false)
+          } else {
+            const data = {
+              title,
+              content,
+              image: `/uploads/${image.filename}`,
+              author: id
+            }
 
-      const data = {
-        title,
-        content,
-        author: id
+            const result = await news.create(data)
+            return responseStandard(res, 'Create news successfully', { result: result })
+          }
+        } else {
+          return responseStandard(res, 'Image field is required!', {}, 400, false)
+        }
       }
-
-      const result = await news.create(data)
-      return responseStandard(res, 'Create news successfully', { result: result })
-    }
+    })
   },
   editNews: async (req, res) => {
     const { id } = req.user
