@@ -120,5 +120,35 @@ module.exports = {
     } else {
       return responseStandard(res, 'There is no news!', {}, 404, false)
     }
+  },
+  getNewsById: async (req, res) => {
+    const { id } = req.params
+
+    const schema = Joi.object({
+      id: Joi.number().integer().min(1)
+    })
+
+    const { error, value } = schema.validate({ id: id })
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { id } = value
+      const getNews = await news.findByPk(id, {
+        include: {
+          model: Users,
+          as: 'Author',
+          attributes: ['id', 'name', 'photo'],
+          required: true
+        },
+        attributes: ['id', 'title', 'content', 'image', 'createdAt', 'updatedAt']
+      })
+
+      if (getNews) {
+        return responseStandard(res, 'Get a news!', { result: getNews })
+      } else {
+        return responseStandard(res, 'News not found!', {}, 404, false)
+      }
+    }
   }
 }
