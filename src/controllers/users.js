@@ -39,5 +39,28 @@ module.exports = {
         return responseStandard(res, 'Create user successfully', { result: result })
       }
     }
+  },
+  isEmailValid: async (req, res) => {
+    const schema = Joi.object({
+      email: Joi.string().email().max(255).required()
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { email } = value
+      const user = await Users.findOne({
+        attributes: ['email'],
+        where: { email }
+      })
+
+      if (user) {
+        return responseStandard(res, 'Found an email!', {})
+      } else {
+        return responseStandard(res, 'Email not found!', {}, 404, false)
+      }
+    }
   }
 }
