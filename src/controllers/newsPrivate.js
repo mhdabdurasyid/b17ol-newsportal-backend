@@ -6,8 +6,7 @@ const { Op } = require('sequelize')
 
 const { APP_PORT, BASE_URL } = process.env
 
-const { news } = require('../models')
-const { Users } = require('../models')
+const { news, sequelize, Users } = require('../models')
 
 module.exports = {
   postNews: async (req, res) => {
@@ -165,7 +164,7 @@ module.exports = {
         attributes: ['id', 'name', 'photo'],
         required: true
       },
-      attributes: ['id', 'title', 'content', 'image', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'title', [sequelize.fn('substr', sequelize.col('news.content'), 1, 200), 'content'], 'image', 'createdAt', 'updatedAt'],
       where: {
         author: id,
         [Op.or]: [
