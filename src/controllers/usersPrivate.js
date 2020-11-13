@@ -1,6 +1,7 @@
 const responseStandard = require('../helpers/responses')
 const upload = require('../helpers/upload')
 const Joi = require('joi')
+const bcrypt = require('bcryptjs')
 
 const { Users } = require('../models')
 
@@ -54,5 +55,39 @@ module.exports = {
         }
       }
     })
+  },
+  updatePassword: async (req, res) => {
+    const { id } = req.user
+
+    const schema = Joi.object({
+      oldPassword: Joi.string().min(6).max(16).required(),
+      newPassword: Joi.string().min(6).max(16).required(),
+      confirmPassword: Joi.ref('newPassword')
+    })
+
+    const user = await Users.findByPk(id, { attributes: ['password'] })
+
+    if (user) {
+      const { error, value } = schema.validate(req.body)
+
+      if (error) {
+        return responseStandard(res, error.message, {}, 400, false)
+      } else {
+        const { oldPassword, newPassword } = value
+        const isOldPasswordMatch = bcrypt.compareSync(oldPassword, user.dataValues.password)
+
+        if (isOldPasswordMatch) {
+          const salt = bcrypt.genSaltSync(10)
+          const hashedPassword = bcrypt.hashSync(newPassword, salt)
+
+          await Users.update({ password: hashedPassword }, { where: { id } })
+          return responseStandard(res, 'Update password successfully!', {})
+        } else {
+          return responseStandard(res, 'Old Password not match!', {}, 401, false)
+        }
+      }
+    } else {
+      return responseStandard(res, 'User not found!', {}, 404, false)
+    }
   }
 }
