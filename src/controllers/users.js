@@ -52,12 +52,12 @@ module.exports = {
     } else {
       const { email } = value
       const user = await Users.findOne({
-        attributes: ['email'],
+        attributes: ['id', 'email'],
         where: { email }
       })
 
       if (user) {
-        return responseStandard(res, 'Found an email!', {})
+        return responseStandard(res, 'Found an email!', { result: user })
       } else {
         return responseStandard(res, 'Email not found!', {}, 404, false)
       }
